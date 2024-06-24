@@ -22,14 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.world.entity;
+package org.spongepowered.common.mixin.core.world.entity;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -53,14 +52,15 @@ import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.ArrayList;
 
+import javax.annotation.Nonnull;
+
 @Mixin(value = LivingEntity.class, priority = 900)
-public abstract class LivingEntityMixin_Forge_Attack_impl extends EntityMixin
+public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin
     implements LivingEntityBridge, PlatformLivingEntityBridge {
 
     //@formatter:off
@@ -70,14 +70,14 @@ public abstract class LivingEntityMixin_Forge_Attack_impl extends EntityMixin
     @Shadow protected abstract void shadow$blockUsingShield(final LivingEntity $$0);
     @Shadow protected abstract void shadow$hurtArmor(DamageSource source, float damage);
     @Shadow protected abstract float shadow$getKnockback(final Entity $$0, final DamageSource $$1);
-    @Shadow public abstract ItemStack shadow$getItemInHand(final InteractionHand $$0);
     @Shadow public abstract float shadow$getAbsorptionAmount();
     @Shadow public abstract void setAbsorptionAmount(final float $$0);
+    @Shadow @Nonnull public abstract ItemStack shadow$getWeaponItem();
+
     @Shadow protected int attackStrengthTicker;
     @Shadow protected float lastHurt;
-
-
     // @formatter:on
+
     private float attackImpl$lastHurt;
     private int attackImpl$InvulnerableTime;
 
@@ -296,8 +296,8 @@ public abstract class LivingEntityMixin_Forge_Attack_impl extends EntityMixin
      * Prevents {@link ServerPlayer#awardStat} from running before event
      */
     @Redirect(method = "getDamageAfterMagicAbsorb",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/stats/Stat;I)V"))
-    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final Stat<?> stat, final int i) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;awardStat(Lnet/minecraft/resources/ResourceLocation;I)V"))
+    public void attackImpl$onAwardStatDamageResist(final ServerPlayer instance, final ResourceLocation resourceLocation, final int i) {
         // do nothing
     }
 
